@@ -11,7 +11,7 @@
 *   All Cheatsheet:
 *   1. Skyboxlib SkyboxLoad(const char* ImgSkyboxPath, const char* TextureHDRPath, const char* SkyboxVSPath, const char* SkyboxFSPath, const char* CubemapVSPath, const char* CubemapFSPath);
 *   2. void SkyboxUpdate(Skylib* skybox);
-*   3. void DrawSkybox(Skylib* skybo);
+*   3. void DrawSkybox(Skylib* skybox);
 *   4. void DrawSkyboxTexture(Skylib* skybox);
 *   5. void UnloadSkybox(Skylib* skybox);
 *
