@@ -3,26 +3,6 @@
 *   Raylib A.P.I - Skybox loading and drawing
 *   A.P.I Created by Zach Noland (@MuzakyGood)
 *
-*   API Header Description(skybox.h):
-*   This header was created to make it easier to create a skybox on 3D graphics in Raylib. 
-*   The code examples are based on the basic structure of raylib and are easy to use for beginners.
-*   This header works for C/C++ .
-*
-*   All Cheatsheet:
-*   1. Skyboxlib SkyboxLoad(const char* ImgSkyboxPath, const char* TextureHDRPath, const char* SkyboxVSPath, const char* SkyboxFSPath, const char* CubemapVSPath, const char* CubemapFSPath);
-*   2. void SkyboxUpdate(Skylib* skybox);
-*   3. void DrawSkybox(Skylib* skybox);
-*   4. void DrawSkyboxTexture(Skylib* skybox);
-*   5. void UnloadSkybox(Skylib* skybox);
-*
-*   Important:
-*   I used the code example on the Raylib website and bit edit. 
-*   I added a function and a typedef struct, 
-*   and edited for variable pointers to support A.P.I to make it easier for beginners to use.
-*   Code originally created by Ramon Santamaria (@raysan5)
-*   It is allowed to use the code very freely: modify, distribute, and use it for personal or commercial purposes, 
-*   but must still include the original credit and header creator if it is to be edited and published.
-*
 *   License in origin code: 
 *   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
 *   BSD-like license that allows static linking with closed source software
