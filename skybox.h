@@ -51,8 +51,6 @@ Skyboxlib SkyboxLoad(const char* ImgSkyboxPath, const char* TextureHDRPath, cons
     
     Skyboxlib skybox = { false, "", {0}, {0}, {0} };
     
-    if( TextureHDRPath ) skybox.useHDR = true;
-    
     // Load skybox model
     skybox.meshbox = GenMeshCube(1.0f, 1.0f, 1.0f);
     skybox.modelbox = LoadModelFromMesh(skybox.meshbox);
