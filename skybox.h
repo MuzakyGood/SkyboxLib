@@ -78,9 +78,11 @@ Skyboxlib SkyboxLoad(const char* ImgSkyboxPath, const char* TextureHDRPath, cons
         skybox.modelbox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = GenTextureCubemap(skybox.shaderbox, panorama, 1024, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
         UnloadTexture(panorama);
     } else {
-        Image img = LoadImage(ImgSkyboxPath);
-        skybox.modelbox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(img, CUBEMAP_LAYOUT_AUTO_DETECT);
-        UnloadImage(img);
+        // TODO: WARNING: On PLATFORM_WEB it requires a big amount of memory to process input image
+        // and generate the required cubemap image to be passed to rlLoadTextureCubemap()
+        Image image = LoadImage(ImgSkyboxPath);
+        skybox.modelbox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(image, CUBEMAP_LAYOUT_AUTO_DETECT);
+        UnloadImage(image);
     }
 
     return skybox;
@@ -93,16 +95,18 @@ void SkyboxUpdate(Skyboxlib* skybox) {
         FilePathList droppedFiles = LoadDroppedFiles();
         if (droppedFiles.count == 1) {
             if (IsFileExtension(droppedFiles.paths[0], ".png;.jpg;.hdr;.bmp;.tga")) {
+				// Unload current cubemap texture to load new one
                 UnloadTexture(skybox->modelbox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture);
 
                 if (skybox->useHDR) {
+					// Load HDR panorama (sphere) texture
                     Texture2D panorama = LoadTexture(droppedFiles.paths[0]);
                     skybox->modelbox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = GenTextureCubemap(skybox->shaderbox, panorama, 1024, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-                    UnloadTexture(panorama);
+                    UnloadTexture(panorama);    // Texture not required anymore, cubemap already generated                    
                 } else {
-                    Image img = LoadImage(droppedFiles.paths[0]);
-                    skybox->modelbox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(img, CUBEMAP_LAYOUT_AUTO_DETECT);
-                    UnloadImage(img);
+                    Image image = LoadImage(droppedFiles.paths[0]);
+                    skybox->modelbox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = LoadTextureCubemap(image, CUBEMAP_LAYOUT_AUTO_DETECT);
+                    UnloadImage(image);
                 }
 
                 TextCopy(skybox->skyboxFileName, droppedFiles.paths[0]);
@@ -135,9 +139,13 @@ void UnloadSkybox(Skyboxlib* skybox) {
     UnloadShader(skybox->modelbox.materials[0].shader);
     UnloadTexture(skybox->modelbox.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture);
     UnloadModel(skybox->modelbox);
+    //UnloadShader(shdrCubemap);
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//------------------------------------------------------------------------------------
+// Module Functions Definition
+//------------------------------------------------------------------------------------
 static TextureCubemap GenTextureCubemap(Shader shader, Texture2D panorama, int size, int format)
 {
     TextureCubemap cubemap = { 0 };
@@ -147,9 +155,9 @@ static TextureCubemap GenTextureCubemap(Shader shader, Texture2D panorama, int s
     // STEP 1: Setup framebuffer
     //------------------------------------------------------------------------------------------
     unsigned int rbo = rlLoadTextureDepth(size, size, true);
-    cubemap.id = rlLoadTextureCubemap(0, size, format);
+    cubemap.id = rlLoadTextureCubemap(0, size, format, 1);
 
-    unsigned int fbo = rlLoadFramebuffer(size, size);
+    unsigned int fbo = rlLoadFramebuffer();
     rlFramebufferAttach(fbo, rbo, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_RENDERBUFFER, 0);
     rlFramebufferAttach(fbo, cubemap.id, RL_ATTACHMENT_COLOR_CHANNEL0, RL_ATTACHMENT_CUBEMAP_POSITIVE_X, 0);
 
@@ -163,7 +171,8 @@ static TextureCubemap GenTextureCubemap(Shader shader, Texture2D panorama, int s
     rlEnableShader(shader.id);
 
     // Define projection matrix and send it to shader
-    Matrix matFboProjection = MatrixPerspective(90.0*DEG2RAD, 1.0, RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
+    Matrix matFboProjection = MatrixPerspective(90.0*DEG2RAD, 1.0, rlGetCullDistanceNear(), rlGetCullDistanceFar());    
+    //Matrix matFboProjection = MatrixPerspective(90.0*DEG2RAD, 1.0, RL_CULL_DISTANCE_NEAR, RL_CULL_DISTANCE_FAR);
     rlSetUniformMatrix(shader.locs[SHADER_LOC_MATRIX_PROJECTION], matFboProjection);
 
     // Define view matrix for every side of the cubemap
